@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: hotelapp
+      POSTGRES_PASSWORD: HotelApp123!
+      POSTGRES_DB: hotelmanagement
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotelapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: HotelApp123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "HotelApp123!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: Y
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "9411:9411"
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  api-gateway:
+    image: ${DOCKER_REGISTRY-}api-gateway
+    build:
+      context: ../
+      dockerfile: src/Services/ApiGateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - identity-service
+      - hotel-inventory-service
+      - availability-pricing-service
+      - reservation-service
+
+  identity-service:
+    image: ${DOCKER_REGISTRY-}identity-service
+    build:
+      context: ../
+      dockerfile: src/Services/Identity/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=identity;User Id=hotelapp;Password=HotelApp123!
+      - DB_PROVIDER=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  hotel-inventory-service:
+    image: ${DOCKER_REGISTRY-}hotel-inventory-service
+    build:
+      context: ../
+      dockerfile: src/Services/HotelInventory/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=hotelinventory;User Id=hotelapp;Password=HotelApp123!
+      - DB_PROVIDER=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  availability-pricing-service:
+    image: ${DOCKER_REGISTRY-}availability-pricing-service
+    build:
+      context: ../
+      dockerfile: src/Services/AvailabilityPricing/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=availability;User Id=hotelapp;Password=HotelApp123!
+      - DB_PROVIDER=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reservation-service:
+    image: ${DOCKER_REGISTRY-}reservation-service
+    build:
+      context: ../
+      dockerfile: src/Services/Reservation/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=reservations;User Id=hotelapp;Password=HotelApp123!
+      - DB_PROVIDER=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  sqlserver_data:
+  seq_data:
+  redis_data:
