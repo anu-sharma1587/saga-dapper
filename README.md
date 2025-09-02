@@ -1,122 +1,136 @@
-# Hotel Management System
 
-A microservices-based hotel management system built with .NET 8, implementing DDD patterns, CQRS, and the Saga pattern for distributed transactions.
+# Hotel Management Microservices Solution
 
-## Architecture Overview
+This solution is a modern, production-ready hotel management system built with .NET 8, Dapper, and PostgreSQL. It features a robust microservices architecture, distributed transactions via Saga orchestration, and advanced API Gateway resilience.
 
-The system is composed of multiple microservices, each responsible for a specific business domain:
+## Solution Highlights
 
-- **API Gateway**: YARP-based gateway that routes requests to appropriate services
-- **Identity Service**: Handles authentication, authorization, and user management
-- **Hotel Inventory Service**: Manages hotels, room types, and amenities
-- **Availability & Pricing Service**: Handles room availability and dynamic pricing
-- **Reservation Service**: Manages bookings and reservation workflow
-- **Guest Service**: Handles guest profiles and preferences
-- **Payment Service**: Processes payments and manages payment lifecycle
-- **Billing Service**: Generates invoices and handles financial transactions
-- **Check-In/Out Service**: Manages guest arrivals and departures
-- **Housekeeping Service**: Tracks room status and cleaning schedules
-- **Maintenance Service**: Handles maintenance requests and asset management
-- **Notifications Service**: Sends emails, SMS, and other notifications
-- **Loyalty Service**: Manages loyalty program points and rewards
-- **Reporting Service**: Generates business analytics and reports
-- **Search Service**: Provides full-text search capabilities
+- **Microservices**: Each business domain is implemented as an independent ASP.NET Core service.
+- **Data Access**: All services use Dapper with PostgreSQL stored procedures. The shared `DataAccess` library provides `IDbConnectionFactory` and `IDataRepository` abstractions.
+- **No EF Core**: Entity Framework Core has been fully removed. All data operations are via Dapper and stored procedures.
+- **Saga Orchestration**: Distributed transactions are managed using the Saga pattern, with compensation logic for reliability.
+- **API Gateway**: Built with YARP, featuring rate limiting (Microsoft.AspNetCore.RateLimiting) and circuit breaker (Polly) for resilience.
+- **Authentication**: JWT-based authentication and refresh tokens.
+- **Monitoring**: OpenTelemetry, Jaeger, and Seq for tracing and logging.
+- **Containerization**: Docker and Kubernetes support for deployment.
 
-## Technologies
+## Microservices List
 
-- **Backend**: .NET 8 (ASP.NET Core)
-- **Data Access**: Dapper with Stored Procedures (PostgreSQL/SQL Server)
-- **Message Bus**: Internal HTTP-based orchestration
-- **Authentication**: JWT with refresh tokens
-- **Monitoring**: OpenTelemetry, Jaeger, Seq
-- **Containerization**: Docker, Kubernetes
-- **CI/CD**: GitHub Actions
+- ApiGateway
+- Identity
+- HotelInventory
+- AvailabilityPricing
+- Reservation
+- Guest
+- Payment
+- Billing
+- CheckInOut
+- Housekeeping
+- Maintenance
+- Notifications
+- Loyalty
+- Reporting
+- Search
+
+## Technologies Used
+
+- .NET 8 (ASP.NET Core)
+- Dapper (ORM)
+- PostgreSQL
+- YARP (API Gateway)
+- Polly (Circuit Breaker)
+- Microsoft.AspNetCore.RateLimiting
+- JWT Authentication
+- OpenTelemetry, Jaeger, Seq
+- Docker, Kubernetes
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET 8 SDK
+- .NET 8 SDK (required)
 - Docker Desktop
 - Visual Studio 2022 or VS Code
 
-### Setup
+### Setup Instructions
 
-1. Clone the repository:
-   \`\`\`bash
+1. **Clone the repository**
+   ```bash
    git clone <repository-url>
    cd hotel-management
-   \`\`\`
+   ```
 
-2. Start infrastructure services:
-   \`\`\`bash
+2. **Start infrastructure services**
+   ```bash
    cd docker
    docker-compose up -d
-   \`\`\`
+   ```
 
-3. Run database migrations:
-   \`\`\`bash
-   # For PostgreSQL (default)
+3. **Run database migrations**
+   ```bash
    export DB_PROVIDER=postgres
    dotnet run --project tools/DbMigrator
+   ```
 
-   # For SQL Server
-   export DB_PROVIDER=mssql
-   dotnet run --project tools/DbMigrator
-   \`\`\`
-
-4. Start the services:
-   \`\`\`bash
+4. **Start all microservices**
+   ```bash
    docker-compose up -d
-   \`\`\`
+   ```
 
-### Development
+### Development Endpoints
 
-- API Gateway runs on http://localhost:5000
+- API Gateway: http://localhost:5000
 - Seq dashboard: http://localhost:5341
 - Jaeger UI: http://localhost:16686
 
 ## Project Structure
 
-\`\`\`
+```
 src/
-  BuildingBlocks/           # Shared libraries
-    Common/                 # Common utilities and base classes
-    EventBus/              # Event bus abstractions
-    Security/              # Authentication and authorization
-    Resilience/           # Polly policies
-    Observability/        # Logging and tracing
+  BuildingBlocks/
+    Common/           # Utilities and base classes
+    EventBus/         # Event bus abstractions
+    Security/         # AuthN/AuthZ
+    Resilience/       # Polly policies
+    Observability/    # Logging and tracing
+    DataAccess/       # Dapper, connection factory, repository
 
-  Services/                # Microservices
-    ApiGateway/           # YARP-based API Gateway
-    Identity/             # User authentication and authorization
-    HotelInventory/       # Hotel and room management
-    AvailabilityPricing/  # Availability and pricing
-    Reservation/          # Booking management
-    Guest/                # Guest profiles
-    Payment/              # Payment processing
-    Billing/             # Invoice generation
-    CheckInOut/          # Check-in/out management
-    Housekeeping/        # Room status and cleaning
-    Maintenance/         # Maintenance requests
-    Notifications/       # Communication service
-    Loyalty/             # Loyalty program
-    Reporting/           # Analytics and reporting
-    Search/              # Search functionality
+  Services/
+    ApiGateway/
+    Identity/
+    HotelInventory/
+    AvailabilityPricing/
+    Reservation/
+    Guest/
+    Payment/
+    Billing/
+    CheckInOut/
+    Housekeeping/
+    Maintenance/
+    Notifications/
+    Loyalty/
+    Reporting/
+    Search/
 
-tests/                    # Test projects
-docker/                  # Docker compose files
-k8s/                    # Kubernetes manifests
-docs/                   # Documentation
-tools/                  # Utilities and scripts
-\`\`\`
+tests/                # Test projects
+docker/               # Docker compose files
+k8s/                  # Kubernetes manifests
+docs/                 # Documentation
+tools/                # Utilities and scripts
+```
 
 ## Testing
 
-Run tests:
-\`\`\`bash
+Run all tests:
+```bash
 dotnet test
-\`\`\`
+```
+
+## Troubleshooting
+
+- **.NET SDK Version**: Ensure you have .NET 8 SDK installed. Run `dotnet --version` to check.
+- **Build Errors**: If you see errors about missing types (e.g., `SqlParameter`, `SqlDbType`), ensure all code uses Dapper and PostgreSQL types only. Remove any SQL Server/EF Core remnants.
+- **API Gateway Issues**: Confirm YARP, Polly, and rate limiting are configured in `Program.cs` and `appsettings.json`.
 
 ## Contributing
 
