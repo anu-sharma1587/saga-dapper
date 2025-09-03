@@ -1,6 +1,8 @@
-using HotelManagement.Services.Availability.Data;
+using DataAccess;
 using HotelManagement.Services.Availability.Models;
 using HotelManagement.Services.Availability.Models.Dtos;
+using DataAccess.Dapper;
+using DataAccess.DbConnectionProvider;
 using HotelManagement.Services.Availability.Events;
 using HotelManagement.Services.Availability.Events.Integration;
 using Dapper;

@@ -4,15 +4,15 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pdeleteinventoryblock")]
+        [DbProcedureAttribute("pdeleteinventoryblock")]
     public partial class DeleteInventoryBlockParams : DbParameterHandler
     {
-        [SqlParameter("@id")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@id")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid Id { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

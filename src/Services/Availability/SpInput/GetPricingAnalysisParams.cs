@@ -4,23 +4,23 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pgetpricinganalysis")]
+        [DbProcedureAttribute("pgetpricinganalysis")]
     public partial class GetPricingAnalysisParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid RoomTypeId { get; set; }
 
-        [SqlParameter("@date")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@date")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime Date { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

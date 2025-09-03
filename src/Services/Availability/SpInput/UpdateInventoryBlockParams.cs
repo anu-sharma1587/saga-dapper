@@ -3,7 +3,7 @@ using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedureAttribute("pupdateinventoryblock")]
+        [DbProcedureAttribute("pupdateinventoryblock")]
     public partial class UpdateInventoryBlockParams : DbParameterHandler
     {
     [SqlParameterAttribute("@id")]

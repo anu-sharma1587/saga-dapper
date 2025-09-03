@@ -4,7 +4,7 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedureAttribute("pupdateseasonalperiod")]
+        [DbProcedureAttribute("pupdateseasonalperiod")]
     public partial class UpdateSeasonalPeriodParams : DbParameterHandler
     {
     [SqlParameterAttribute("@id")]

@@ -4,19 +4,19 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pgetactiveinventoryblocks")]
+    [DbProcedureAttribute("pgetactiveinventoryblocks")]
     public partial class GetActiveInventoryBlocksParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+        [SqlParameterAttribute("@hotelid")]
+        [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+        [SqlParameterAttribute("@roomtypeid")]
+        [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid? RoomTypeId { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+        [SqlParameterAttribute("p_refcur_1")]
+        [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

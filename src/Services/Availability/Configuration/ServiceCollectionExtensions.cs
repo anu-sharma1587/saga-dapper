@@ -2,7 +2,7 @@ using HealthChecks.NpgSql;
 using HotelManagement.Services.Availability.Data;
 using HotelManagement.Services.Availability.Services;
 using HotelManagement.Services.Availability.Events;
-using Microsoft.EntityFrameworkCore;
+// Removed EF Core dependency
 
 namespace HotelManagement.Services.Availability.Configuration;
 

@@ -4,27 +4,27 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pgetroomavailability")]
+        [DbProcedureAttribute("pgetroomavailability")]
     public partial class GetRoomAvailabilityParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@checkin")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@checkin")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime CheckIn { get; set; }
 
-        [SqlParameter("@checkout")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@checkout")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime CheckOut { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid? RoomTypeId { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

@@ -4,27 +4,27 @@ using DataAccess.Mediator.Handler;
 
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pgetdemandforecasts")]
+        [DbProcedureAttribute("pgetdemandforecasts")]
     public partial class GetDemandForecastsParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid RoomTypeId { get; set; }
 
-        [SqlParameter("@startdate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@startdate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime StartDate { get; set; }
 
-        [SqlParameter("@enddate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@enddate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime EndDate { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

@@ -3,7 +3,7 @@ using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedureAttribute("pcreatespecialevent")]
+        [DbProcedureAttribute("pcreatespecialevent")]
     public partial class CreateSpecialEventParams : DbParameterHandler
     {
     [SqlParameterAttribute("@hotelid")]
