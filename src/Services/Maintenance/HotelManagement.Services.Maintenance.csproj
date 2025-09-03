@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageReference Include="Npgsql" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Common/HotelManagement.BuildingBlocks.Common/HotelManagement.BuildingBlocks.Common.csproj" />
+    <ProjectReference Include="../../../Libraries/DataAccess/DataAccess.csproj" />
   </ItemGroup>
-
-</Project>

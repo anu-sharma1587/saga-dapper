@@ -1,7 +1,6 @@
 using System;
 using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
-
 namespace HotelManagement.Services.Availability.SpInput
 {
     [DbProcedure("pcreateseasonalperiod")]

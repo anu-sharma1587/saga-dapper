@@ -25,8 +25,8 @@ public static class ObservabilityExtensions
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
-            .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
+            .Enrich.WithProperty("MachineName", Environment.MachineName)
+            // .Enrich.WithEnvironmentName() removed: not supported in current Serilog version
             .WriteTo.Console()
             .WriteTo.Seq(seqServerUrl)
             .CreateLogger();
@@ -55,7 +55,7 @@ public static class ObservabilityExtensions
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddProcessInstrumentation()
+                    // .AddProcessInstrumentation() removed: not supported in current OpenTelemetry version
                     .AddOtlpExporter(options => options.Endpoint = new Uri(jaegerEndpoint));
             });
 

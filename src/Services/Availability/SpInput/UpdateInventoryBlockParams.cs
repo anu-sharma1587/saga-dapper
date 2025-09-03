@@ -1,54 +1,53 @@
 using System;
 using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
-
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pupdateinventoryblock")]
+    [DbProcedureAttribute("pupdateinventoryblock")]
     public partial class UpdateInventoryBlockParams : DbParameterHandler
     {
-        [SqlParameter("@id")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@id")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid Id { get; set; }
 
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid RoomTypeId { get; set; }
 
-        [SqlParameter("@startdate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@startdate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime StartDate { get; set; }
 
-        [SqlParameter("@enddate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@enddate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime EndDate { get; set; }
 
-        [SqlParameter("@blockedrooms")]
-        [SqlDbType(System.Data.DbType.Int32)]
+    [SqlParameterAttribute("@blockedrooms")]
+    [SqlDbTypeAttribute(System.Data.DbType.Int32)]
         public int BlockedRooms { get; set; }
 
-        [SqlParameter("@reason")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@reason")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string Reason { get; set; }
 
-        [SqlParameter("@reference")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@reference")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string Reference { get; set; }
 
-        [SqlParameter("@isactive")]
-        [SqlDbType(System.Data.DbType.Boolean)]
+    [SqlParameterAttribute("@isactive")]
+    [SqlDbTypeAttribute(System.Data.DbType.Boolean)]
         public bool IsActive { get; set; }
 
-        [SqlParameter("@updatedat")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@updatedat")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime UpdatedAt { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

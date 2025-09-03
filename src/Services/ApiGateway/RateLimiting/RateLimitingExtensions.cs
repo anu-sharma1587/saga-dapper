@@ -73,7 +73,7 @@ public static class RateLimitingExtensions
                 await context.HttpContext.Response.WriteAsJsonAsync(new
                 {
                     error = "Too many requests. Please try again later.",
-                    retryAfter = retryAfter?.TotalSeconds ?? 60
+                    retryAfter = retryAfter != null ? retryAfter.TotalSeconds : 60
                 }, token);
             };
         });

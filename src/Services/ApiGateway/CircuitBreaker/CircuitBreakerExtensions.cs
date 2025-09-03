@@ -16,23 +16,28 @@ public class CircuitBreakerOptions
 
 public static class CircuitBreakerExtensions
 {
-    private static readonly Dictionary<string, ICircuitBreakerPolicy<HttpResponseMessage>> Circuits = new();
+    private static readonly Dictionary<string, AsyncCircuitBreakerPolicy<HttpResponseMessage>> Circuits = new();
 
     public static IServiceCollection AddCircuitBreaker(this IServiceCollection services, IConfiguration configuration)
     {
         var options = configuration.GetSection("CircuitBreaker").Get<CircuitBreakerOptions>() ?? new CircuitBreakerOptions();
 
         services.AddHttpClient("CircuitBreakerClient")
-            .AddTransientHttpErrorPolicy(builder => builder
+            .AddPolicyHandler(Policy<HttpResponseMessage>
+                .Handle<HttpRequestException>()
+                .Or<TimeoutException>()
                 .WaitAndRetryAsync(
                     options.RetryCount,
                     retryAttempt => TimeSpan.FromMilliseconds(options.RetryDelayMilliseconds * Math.Pow(2, retryAttempt - 1)),
-                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    (outcome, timespan, retryCount, context) =>
                     {
-                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerExtensions>>();
-                        logger?.LogWarning(exception, "Retry {RetryCount} after {TimeSpan}ms", retryCount, timeSpan.TotalMilliseconds);
-                    }))
-            .AddTransientHttpErrorPolicy(builder => builder
+                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerOptions>>();
+                        logger?.LogWarning("Retry {RetryCount} after {TimeSpan}ms", retryCount, timespan.TotalMilliseconds);
+                    })
+                )
+            .AddPolicyHandler(Policy<HttpResponseMessage>
+                .Handle<HttpRequestException>()
+                .Or<TimeoutException>()
                 .AdvancedCircuitBreakerAsync(
                     failureThreshold: options.FailureThreshold,
                     samplingDuration: TimeSpan.FromSeconds(options.SamplingDurationSeconds),
@@ -40,17 +45,17 @@ public static class CircuitBreakerExtensions
                     durationOfBreak: TimeSpan.FromSeconds(options.DurationOfBreakSeconds),
                     onBreak: (exception, duration) =>
                     {
-                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerExtensions>>();
-                        logger?.LogError(exception, "Circuit breaker opened for {Duration}s", duration.TotalSeconds);
+                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerOptions>>();
+                        logger?.LogError("Circuit breaker opened for {Duration}s", duration.TotalSeconds);
                     },
                     onReset: () =>
                     {
-                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerExtensions>>();
+                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerOptions>>();
                         logger?.LogInformation("Circuit breaker reset");
                     },
                     onHalfOpen: () =>
                     {
-                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerExtensions>>();
+                        var logger = services.BuildServiceProvider().GetService<ILogger<CircuitBreakerOptions>>();
                         logger?.LogInformation("Circuit breaker half-open");
                     }));
 
@@ -59,7 +64,7 @@ public static class CircuitBreakerExtensions
 
     public static IApplicationBuilder UseCircuitBreaker(this IApplicationBuilder app)
     {
-        var logger = app.ApplicationServices.GetService<ILogger<CircuitBreakerExtensions>>();
+    var logger = app.ApplicationServices.GetService<ILogger<CircuitBreakerOptions>>();
 
         // Add circuit breaker transform to YARP
         var transform = new CircuitBreakerTransform(logger);
@@ -78,7 +83,7 @@ public static class CircuitBreakerExtensions
                             ?.GetSection("CircuitBreaker")
                             .Get<CircuitBreakerOptions>() ?? new CircuitBreakerOptions();
 
-                        Circuits[circuitKey] = Policy<HttpResponseMessage>
+                        var cbPolicy = Policy<HttpResponseMessage>
                             .Handle<HttpRequestException>()
                             .Or<TimeoutException>()
                             .AdvancedCircuitBreakerAsync(
@@ -86,11 +91,13 @@ public static class CircuitBreakerExtensions
                                 samplingDuration: TimeSpan.FromSeconds(options.SamplingDurationSeconds),
                                 minimumThroughput: options.MinimumThroughput,
                                 durationOfBreak: TimeSpan.FromSeconds(options.DurationOfBreakSeconds));
+                        if (cbPolicy is AsyncCircuitBreakerPolicy<HttpResponseMessage> asyncPolicy)
+                        {
+                            Circuits[circuitKey] = asyncPolicy;
+                        }
                     }
 
-                    var circuit = Circuits[circuitKey];
-                    
-                    if (circuit.CircuitState == CircuitState.Open)
+                    if (Circuits.TryGetValue(circuitKey, out var circuit) && circuit.CircuitState == CircuitState.Open)
                     {
                         context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                         return Task.CompletedTask;

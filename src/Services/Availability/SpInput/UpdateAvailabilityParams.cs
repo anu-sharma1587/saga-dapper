@@ -1,42 +1,41 @@
 using System;
 using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
-
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pupdateavailability")]
+    [DbProcedureAttribute("pupdateavailability")]
     public partial class UpdateAvailabilityParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid RoomTypeId { get; set; }
 
-        [SqlParameter("@date")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@date")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime Date { get; set; }
 
-        [SqlParameter("@availablerooms")]
-        [SqlDbType(System.Data.DbType.Int32)]
+    [SqlParameterAttribute("@availablerooms")]
+    [SqlDbTypeAttribute(System.Data.DbType.Int32)]
         public int AvailableRooms { get; set; }
 
-        [SqlParameter("@baseprice")]
-        [SqlDbType(System.Data.DbType.Decimal)]
+    [SqlParameterAttribute("@baseprice")]
+    [SqlDbTypeAttribute(System.Data.DbType.Decimal)]
         public decimal? BasePrice { get; set; }
 
-        [SqlParameter("@currentprice")]
-        [SqlDbType(System.Data.DbType.Decimal)]
+    [SqlParameterAttribute("@currentprice")]
+    [SqlDbTypeAttribute(System.Data.DbType.Decimal)]
         public decimal CurrentPrice { get; set; }
 
-        [SqlParameter("@lastupdated")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@lastupdated")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime LastUpdated { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

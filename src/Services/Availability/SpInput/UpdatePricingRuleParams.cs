@@ -1,58 +1,57 @@
 using System;
 using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
-
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pupdatepricingrule")]
+    [DbProcedureAttribute("pupdatepricingrule")]
     public partial class UpdatePricingRuleParams : DbParameterHandler
     {
-        [SqlParameter("@id")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@id")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid Id { get; set; }
 
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@name")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@name")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string Name { get; set; }
 
-        [SqlParameter("@description")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@description")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string Description { get; set; }
 
-        [SqlParameter("@startdate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@startdate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime StartDate { get; set; }
 
-        [SqlParameter("@enddate")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@enddate")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime EndDate { get; set; }
 
-        [SqlParameter("@daysofweek")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@daysofweek")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string DaysOfWeek { get; set; }
 
-        [SqlParameter("@adjustmentpercentage")]
-        [SqlDbType(System.Data.DbType.Decimal)]
+    [SqlParameterAttribute("@adjustmentpercentage")]
+    [SqlDbTypeAttribute(System.Data.DbType.Decimal)]
         public decimal AdjustmentPercentage { get; set; }
 
-        [SqlParameter("@priority")]
-        [SqlDbType(System.Data.DbType.Int32)]
+    [SqlParameterAttribute("@priority")]
+    [SqlDbTypeAttribute(System.Data.DbType.Int32)]
         public int Priority { get; set; }
 
-        [SqlParameter("@isactive")]
-        [SqlDbType(System.Data.DbType.Boolean)]
+    [SqlParameterAttribute("@isactive")]
+    [SqlDbTypeAttribute(System.Data.DbType.Boolean)]
         public bool IsActive { get; set; }
 
-        [SqlParameter("@updatedat")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@updatedat")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime UpdatedAt { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
 }

@@ -1,6 +1,7 @@
-using HotelManagement.Services.Availability.Data;
 using HotelManagement.Services.Availability.Models;
-using Microsoft.EntityFrameworkCore;
+using DataAccess.Dapper;
+using Dapper;
+using Npgsql;
 
 namespace HotelManagement.Services.Availability.Configuration;
 
@@ -9,14 +10,14 @@ public static class DataSeeder
     public static async Task SeedDataAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AvailabilityDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<AvailabilityDbContext>>();
+        var connectionFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
 
         try
         {
-            await SeedSeasonalPeriodsAsync(dbContext);
-            await SeedPricingRulesAsync(dbContext);
-            await dbContext.SaveChangesAsync();
+            using var connection = connectionFactory.CreateConnection();
+            await SeedSeasonalPeriodsAsync(connection);
+            await SeedPricingRulesAsync(connection);
         }
         catch (Exception ex)
         {
@@ -25,15 +26,15 @@ public static class DataSeeder
         }
     }
 
-    private static async Task SeedSeasonalPeriodsAsync(AvailabilityDbContext dbContext)
+    private static async Task SeedSeasonalPeriodsAsync(NpgsqlConnection connection)
     {
-        if (await dbContext.SeasonalPeriods.AnyAsync())
+        var count = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM \"SeasonalPeriods\"");
+        if (count > 0)
         {
             return;
         }
 
-        // Sample seasonal periods for demonstration
-        var hotelId = Guid.NewGuid(); // This should be a real hotel ID from your system
+        var hotelId = Guid.NewGuid();
         var seasons = new[]
         {
             new SeasonalPeriod
@@ -74,18 +75,24 @@ public static class DataSeeder
             }
         };
 
-        await dbContext.SeasonalPeriods.AddRangeAsync(seasons);
+        foreach (var season in seasons)
+        {
+            await connection.ExecuteAsync(
+                "INSERT INTO \"SeasonalPeriods\" (\"Id\", \"Name\", \"Description\", \"StartDate\", \"EndDate\", \"HotelId\", \"BaseAdjustmentPercentage\", \"IsActive\", \"CreatedAt\") " +
+                "VALUES (@Id, @Name, @Description, @StartDate, @EndDate, @HotelId, @BaseAdjustmentPercentage, @IsActive, @CreatedAt)",
+                season);
+        }
     }
 
-    private static async Task SeedPricingRulesAsync(AvailabilityDbContext dbContext)
+    private static async Task SeedPricingRulesAsync(NpgsqlConnection connection)
     {
-        if (await dbContext.PricingRules.AnyAsync())
+        var count = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM \"PricingRules\"");
+        if (count > 0)
         {
             return;
         }
 
-        // Sample pricing rules for demonstration
-        var hotelId = Guid.NewGuid(); // This should be a real hotel ID from your system
+        var hotelId = Guid.NewGuid();
         var rules = new[]
         {
             new PricingRule
@@ -96,7 +103,7 @@ public static class DataSeeder
                 StartDate = DateTime.Now.Date,
                 EndDate = DateTime.Now.AddYears(1).Date,
                 HotelId = hotelId,
-                DaysOfWeek = "5,6", // Friday and Saturday
+                DaysOfWeek = "5,6",
                 AdjustmentPercentage = 20.0m,
                 Priority = 1,
                 IsActive = true,
@@ -110,7 +117,7 @@ public static class DataSeeder
                 StartDate = DateTime.Now.Date,
                 EndDate = DateTime.Now.AddYears(1).Date,
                 HotelId = hotelId,
-                DaysOfWeek = "7", // Sunday
+                DaysOfWeek = "7",
                 AdjustmentPercentage = -10.0m,
                 Priority = 2,
                 IsActive = true,
@@ -124,7 +131,7 @@ public static class DataSeeder
                 StartDate = DateTime.Now.Date,
                 EndDate = DateTime.Now.AddYears(1).Date,
                 HotelId = hotelId,
-                DaysOfWeek = "1,2,3,4,5,6,7", // All days
+                DaysOfWeek = "1,2,3,4,5,6,7",
                 AdjustmentPercentage = -15.0m,
                 Priority = 3,
                 IsActive = true,
@@ -132,6 +139,12 @@ public static class DataSeeder
             }
         };
 
-        await dbContext.PricingRules.AddRangeAsync(rules);
+        foreach (var rule in rules)
+        {
+            await connection.ExecuteAsync(
+                "INSERT INTO \"PricingRules\" (\"Id\", \"Name\", \"Description\", \"StartDate\", \"EndDate\", \"HotelId\", \"DaysOfWeek\", \"AdjustmentPercentage\", \"Priority\", \"IsActive\", \"CreatedAt\") " +
+                "VALUES (@Id, @Name, @Description, @StartDate, @EndDate, @HotelId, @DaysOfWeek, @AdjustmentPercentage, @Priority, @IsActive, @CreatedAt)",
+                rule);
+        }
     }
 }

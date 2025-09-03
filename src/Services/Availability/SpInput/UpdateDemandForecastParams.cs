@@ -1,42 +1,41 @@
 using System;
 using DataAccess.Mediator.Attributes;
 using DataAccess.Mediator.Handler;
-
 namespace HotelManagement.Services.Availability.SpInput
 {
-    [DbProcedure("pupdatedemandforecast")]
+    [DbProcedureAttribute("pupdatedemandforecast")]
     public partial class UpdateDemandForecastParams : DbParameterHandler
     {
-        [SqlParameter("@hotelid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@hotelid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid HotelId { get; set; }
 
-        [SqlParameter("@roomtypeid")]
-        [SqlDbType(System.Data.DbType.Guid)]
+    [SqlParameterAttribute("@roomtypeid")]
+    [SqlDbTypeAttribute(System.Data.DbType.Guid)]
         public Guid RoomTypeId { get; set; }
 
-        [SqlParameter("@date")]
-        [SqlDbType(System.Data.DbType.DateTime)]
+    [SqlParameterAttribute("@date")]
+    [SqlDbTypeAttribute(System.Data.DbType.DateTime)]
         public DateTime Date { get; set; }
 
-        [SqlParameter("@expecteddemand")]
-        [SqlDbType(System.Data.DbType.Int32)]
+    [SqlParameterAttribute("@expecteddemand")]
+    [SqlDbTypeAttribute(System.Data.DbType.Int32)]
         public int ExpectedDemand { get; set; }
 
-        [SqlParameter("@suggestedpriceadjustment")]
-        [SqlDbType(System.Data.DbType.Decimal)]
+    [SqlParameterAttribute("@suggestedpriceadjustment")]
+    [SqlDbTypeAttribute(System.Data.DbType.Decimal)]
         public decimal SuggestedPriceAdjustment { get; set; }
 
-        [SqlParameter("@factors")]
-        [SqlDbType(System.Data.DbType.String)]
+    [SqlParameterAttribute("@factors")]
+    [SqlDbTypeAttribute(System.Data.DbType.String)]
         public string Factors { get; set; }
 
-        [SqlParameter("@isactive")]
-        [SqlDbType(System.Data.DbType.Boolean)]
+    [SqlParameterAttribute("@isactive")]
+    [SqlDbTypeAttribute(System.Data.DbType.Boolean)]
         public bool IsActive { get; set; }
 
-        [SqlParameter("p_refcur_1")]
-        [PostgresRefCursor("p_refcur_1")]
+    [SqlParameterAttribute("p_refcur_1")]
+    [PostgresRefCursorAttribute("p_refcur_1")]
         public object p_refcur_1 { get; set; }
     }
     /*

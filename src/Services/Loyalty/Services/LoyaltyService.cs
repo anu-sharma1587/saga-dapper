@@ -3,7 +3,6 @@ using HotelManagement.Services.Loyalty.DTOs;
 using HotelManagement.Services.Loyalty.Models;
 using HotelManagement.Services.Loyalty.SpInput;
 using DataAccess;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagement.Services.Loyalty.Services;
 

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using HotelManagement.Services.ApiGateway.CircuitBreaker;
+using HotelManagement.BuildingBlocks.Observability;
+using HotelManagement.Services.ApiGateway.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,19 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Add rate limiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.GlobalLimiter = Microsoft.AspNetCore.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(context =>
-    {
-        return RateLimitPartition.GetFixedWindowLimiter("GlobalLimiter", partition =>
-            new Microsoft.AspNetCore.RateLimiting.FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = 100,
-                Window = TimeSpan.FromSeconds(10)
-            });
-    });
-});
+builder.Services.AddCustomRateLimiting(builder.Configuration);
 
 // Add observability
 var observabilitySettings = builder.Configuration.GetSection("Observability");
@@ -98,9 +88,7 @@ app.UseAuthorization();
 app.UseCircuitBreaker();
 
 // Add health checks endpoint
-app.MapGet("/health", () => Results.Ok(new { Status = "Healthy" }))
-    .WithName("Health")
-    .WithOpenApi();
+app.MapGet("/health", () => Results.Ok(new { Status = "Healthy" }));
 
 // Map the reverse proxy routes
 app.MapReverseProxy();
