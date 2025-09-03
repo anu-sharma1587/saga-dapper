@@ -1,7 +1,6 @@
 using System.Data.Common;
 using System.Threading.Tasks;
 using Npgsql;
-using System.Data.SqlClient;
 
 namespace DataAccess.DbConnectionProvider
 {
@@ -20,7 +19,6 @@ namespace DataAccess.DbConnectionProvider
             DbConnection dbConnection = _provider switch
             {
                 "Npgsql" => new NpgsqlConnection(_connectionString),
-                "SqlServer" => new SqlConnection(_connectionString),
                 _ => throw new NotSupportedException($"Provider {_provider} not supported")
             };
             await dbConnection.OpenAsync();
