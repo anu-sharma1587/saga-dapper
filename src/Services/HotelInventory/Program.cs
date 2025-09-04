@@ -1,21 +1,27 @@
-using DataAccess;
-using DataAccess.Postgres;
 using HotelManagement.Services.HotelInventory.Services;
+using DataAccess.DbConnectionProvider;
+using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
+builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
+builder.Services.AddScoped<IHotelService, HotelService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure Dapper with PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("HotelInventoryDb");
-builder.Services.AddSingleton<IDbConnectionFactory>(new PostgresConnectionFactory(connectionString));
-builder.Services.AddScoped<IDataRepository, DapperDataRepository>();
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Auth:Authority"];
+        options.Audience = builder.Configuration["Auth:Audience"];
+        options.RequireHttpsMetadata = builder.Environment.IsProduction();
+    });
 
-// Add application services
-builder.Services.AddScoped<IHotelService, HotelService>();
+builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -30,7 +36,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -39,8 +44,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

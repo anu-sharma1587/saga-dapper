@@ -39,7 +39,7 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Payment>> GetPayment(Guid id)
+    public async Task<ActionResult<Models.Payment>> GetPayment(Guid id)
     {
         var payment = await _paymentService.GetPaymentByIdAsync(id);
         if (payment == null)
@@ -48,7 +48,7 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("reservation/{reservationId}")]
-    public async Task<ActionResult<IEnumerable<Payment>>> GetPaymentsByReservation(Guid reservationId)
+    public async Task<ActionResult<IEnumerable<Models.Payment>>> GetPaymentsByReservation(Guid reservationId)
     {
         var payments = await _paymentService.GetPaymentsByReservationIdAsync(reservationId);
         return Ok(payments);

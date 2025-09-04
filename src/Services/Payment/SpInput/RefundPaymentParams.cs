@@ -1,4 +1,4 @@
-using DataAccess;
+using DataAccess.Dapper;
 using HotelManagement.Services.Payment.Models;
 
 namespace HotelManagement.Services.Payment.SpInput;
@@ -13,7 +13,7 @@ public class RefundPaymentParams : IStoredProcedureParams
     public decimal Amount { get; set; }
     public string Reason { get; set; } = string.Empty;
     public RefundStatus Status { get; set; }
-    public string? TransactionId { get; set; }
+    public string TransactionId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public DateTime? ProcessedAt { get; set; }
+    public DateTime ProcessedAt { get; set; }
 }

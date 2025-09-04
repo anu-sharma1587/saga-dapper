@@ -1,6 +1,9 @@
+
 using HotelManagement.Services.Availability.Configuration;
 using HotelManagement.Services.Availability.Extensions;
 using HotelManagement.Services.Availability.Middleware;
+using DataAccess.DbConnectionProvider;
+using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add Dapper and DataAccess DI
@@ -11,10 +14,11 @@ builder.Services.AddScoped<IDbConnectionFactory>(sp =>
 builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
 
 // Add services to the container.
+builder.Services.AddLogging();
 builder.Services.AddAvailabilityServices(builder.Configuration);
 builder.Services.AddAvailabilityApi();
 builder.Services.AddResiliencePolicies(builder.Configuration);
-builder.Services.AddOpenTelemetry(builder.Configuration);
+HotelManagement.Services.Availability.Extensions.OpenTelemetryExtensions.AddCustomOpenTelemetry(builder.Services, builder.Configuration);
 
 // Add JWT Authentication
 builder.Services.AddAuthentication("Bearer")
@@ -50,6 +54,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Ensure database is created and migrations are applied
-app.Services.EnsureDatabaseCreated();
+// app.Services.EnsureDatabaseCreated();
 
 app.Run();

@@ -1,35 +1,17 @@
 using HotelManagement.Services.Reservation.Services;
-using DataAccess;
+using DataAccess.DbConnectionProvider;
 using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure database connection factory
-builder.Services.AddScoped<IDbConnectionFactory>(provider => 
-    new DbConnectionFactory(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        builder.Configuration.GetValue<string>("DatabaseProvider") ?? "PostgreSQL"
-    ));
-
-// Configure Dapper data repository
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
 builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
-
-// Add HTTP client for availability service
-builder.Services.AddHttpClient<IReservationService, ReservationService>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["Services:Availability"] 
-        ?? throw new InvalidOperationException("Availability service URL not configured."));
-});
-
-// Add services
 builder.Services.AddScoped<IReservationService, ReservationService>();
-
-// Add controllers and API documentation
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add JWT Authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -39,13 +21,21 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddAuthorization();
-
-// Add health checks
 builder.Services.AddHealthChecks();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -53,12 +43,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-
-// Database initialization will be handled by migrations separately
 
 app.Run();

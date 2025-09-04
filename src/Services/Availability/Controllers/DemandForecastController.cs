@@ -55,8 +55,8 @@ public class DemandForecastController : ControllerBase
                 RoomTypeId = request.RoomTypeId,
                 Date = request.Date,
                 ExpectedDemand = request.ExpectedDemand,
-                SuggestedPriceAdjustment = request.SuggestedPriceAdjustment,
-                Factors = request.Factors
+                SuggestedPriceAdjustment = (double)request.SuggestedPriceAdjustment,
+                Factors = request.Factors != null ? System.Text.Json.JsonSerializer.Serialize(request.Factors) : string.Empty,
             };
 
             await _availabilityService.UpdateDemandForecastAsync(forecast);

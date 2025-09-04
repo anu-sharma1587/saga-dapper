@@ -13,23 +13,18 @@ public static class ResiliencePolicies
             .Bind(configuration.GetSection("Resilience"))
             .ValidateDataAnnotations();
 
-        services.AddHttpClient("default")
-            .AddPolicyHandler((sp, _) =>
-            {
-                var options = sp.GetRequiredService<IOptions<ResilienceOptions>>().Value;
-                return CreateDefaultPolicy(options);
-            });
+        // services.AddHttpClient("default")
+        //     .AddPolicyHandler(CreateDefaultPolicy(new ResilienceOptions()));
 
         return services;
     }
 
     private static IAsyncPolicy<HttpResponseMessage> CreateDefaultPolicy(ResilienceOptions options)
     {
-        return Policy<HttpResponseMessage>
-            .WrapAsync(
-                CreateRetryPolicy(options),
-                CreateCircuitBreakerPolicy(options),
-                CreateTimeoutPolicy(options));
+        return Policy.WrapAsync(
+            CreateRetryPolicy(options),
+            CreateCircuitBreakerPolicy(options),
+            CreateTimeoutPolicy(options));
     }
 
     private static IAsyncPolicy<HttpResponseMessage> CreateRetryPolicy(ResilienceOptions options)
@@ -42,12 +37,12 @@ public static class ResiliencePolicies
                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 onRetry: (exception, timeSpan, retryCount, context) =>
                 {
-                    context.GetLogger()?.LogWarning(
-                        exception,
-                        "Retry {RetryCount} of {MaxRetries} after {TimeSpan:g}",
-                        retryCount,
-                        options.MaxRetries,
-                        timeSpan);
+                    // context.GetLogger()?.LogWarning(
+                    //     exception,
+                    //     "Retry {RetryCount} of {MaxRetries} after {TimeSpan:g}",
+                    //     retryCount,
+                    //     options.MaxRetries,
+                    //     timeSpan);
                 });
     }
 
@@ -60,18 +55,18 @@ public static class ResiliencePolicies
                 durationOfBreak: TimeSpan.FromSeconds(options.DurationOfBreakInSeconds),
                 onBreak: (exception, duration) =>
                 {
-                    Log.Warning(
-                        exception,
-                        "Circuit breaker opened for {DurationOfBreak:g}",
-                        duration);
+                    // Log.Warning(
+                    //     exception,
+                    //     "Circuit breaker opened for {DurationOfBreak:g}",
+                    //     duration);
                 },
                 onReset: () =>
                 {
-                    Log.Information("Circuit breaker reset");
+                    // Log.Information("Circuit breaker reset");
                 },
                 onHalfOpen: () =>
                 {
-                    Log.Information("Circuit breaker half-opened");
+                    // Log.Information("Circuit breaker half-opened");
                 });
     }
 
@@ -82,9 +77,9 @@ public static class ResiliencePolicies
             TimeoutStrategy.Optimistic,
             onTimeoutAsync: (context, timeSpan, task) =>
             {
-                context.GetLogger()?.LogWarning(
-                    "Request timed out after {Timeout:g}",
-                    timeSpan);
+                // context.GetLogger()?.LogWarning(
+                //     "Request timed out after {Timeout:g}",
+                //     timeSpan);
                 return Task.CompletedTask;
             });
     }

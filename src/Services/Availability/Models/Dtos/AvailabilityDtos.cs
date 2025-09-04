@@ -75,6 +75,35 @@ public record CreateInventoryBlockRequest
     public string Reference { get; init; } = string.Empty;
 }
 
+
+public record UpdatePricingRuleRequest : CreatePricingRuleRequest
+{
+    public Guid Id { get; init; }
+}
+
+public record UpdateInventoryBlockRequest : CreateInventoryBlockRequest
+{
+    public Guid Id { get; init; }
+    public bool IsActive { get; init; }
+}
+
+public record UpdateSeasonalPeriodRequest : CreateSeasonalPeriodRequest
+{
+    public Guid Id { get; init; }
+    public bool IsActive { get; init; }
+}
+
+public record UpdateSpecialEventRequest : CreateSpecialEventRequest
+{
+    public Guid Id { get; init; }
+    public bool IsActive { get; init; }
+}
+
+public record BatchUpdateAvailabilityRequest
+{
+    public List<UpdateAvailabilityRequest> Updates { get; init; } = new();
+}
+
 public record CreateSeasonalPeriodRequest
 {
     [Required]

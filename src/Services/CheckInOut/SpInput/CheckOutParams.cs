@@ -1,4 +1,4 @@
-using DataAccess;
+using DataAccess.Dapper;
 using HotelManagement.Services.CheckInOut.Models;
 
 namespace HotelManagement.Services.CheckInOut.SpInput;
@@ -10,6 +10,6 @@ public class CheckOutParams : IStoredProcedureParams
     
     public Guid ReservationId { get; set; }
     public DateTime CheckOutTime { get; set; }
-    public CheckInOutStatus Status { get; set; }
+    public string Status { get; set; } = "CheckedOut";
     public string? Notes { get; set; }
 }

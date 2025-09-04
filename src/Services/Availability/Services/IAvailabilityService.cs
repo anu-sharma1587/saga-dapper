@@ -43,8 +43,8 @@ public interface IAvailabilityService
         Guid roomTypeId,
         DateTime date);
 
-    Task UpdateDemandForecastAsync(DemandForecast forecast);
-    Task<List<DemandForecast>> GetDemandForecastsAsync(
+    Task UpdateDemandForecastAsync(HotelManagement.Services.Availability.Models.Dtos.DemandForecast forecast);
+    Task<List<HotelManagement.Services.Availability.Models.Dtos.DemandForecast>> GetDemandForecastsAsync(
         Guid hotelId,
         Guid roomTypeId,
         DateTime startDate,

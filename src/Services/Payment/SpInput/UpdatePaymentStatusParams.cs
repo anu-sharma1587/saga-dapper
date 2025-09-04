@@ -1,4 +1,4 @@
-using DataAccess;
+using DataAccess.Dapper;
 using HotelManagement.Services.Payment.Models;
 
 namespace HotelManagement.Services.Payment.SpInput;

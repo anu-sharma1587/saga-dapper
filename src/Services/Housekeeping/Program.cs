@@ -1,12 +1,12 @@
 using HotelManagement.Services.Housekeeping.Services;
-using DataAccess;
-using DataAccess.Postgres;
+using DataAccess.DbConnectionProvider;
+using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddSingleton<IDbConnectionFactory>(new PostgresConnectionFactory(connectionString));
-builder.Services.AddScoped<IDataRepository, DapperDataRepository>();
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
+builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
 builder.Services.AddScoped<IHousekeepingService, HousekeepingService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +49,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-
-// EF Core migration logic removed
 
 app.Run();

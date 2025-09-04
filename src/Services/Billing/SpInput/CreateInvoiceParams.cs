@@ -1,4 +1,4 @@
-using DataAccess;
+using DataAccess.Dapper;
 
 namespace HotelManagement.Services.Billing.SpInput;
 

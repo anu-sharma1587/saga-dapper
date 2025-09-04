@@ -1,23 +1,13 @@
 using HotelManagement.Services.Reporting.Services;
-using DataAccess;
+using DataAccess.DbConnectionProvider;
 using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure database connection factory
-builder.Services.AddScoped<IDbConnectionFactory>(provider => 
-    new DbConnectionFactory(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        builder.Configuration.GetValue<string>("DatabaseProvider") ?? "PostgreSQL"
-    ));
-
-// Configure Dapper data repository
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
 builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
-
-// Add services
 builder.Services.AddScoped<IReportingService, ReportingService>();
-
-// Add controllers and API documentation
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -33,6 +23,17 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -42,12 +43,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-
-// Database initialization will be handled by migrations separately
 
 app.Run();

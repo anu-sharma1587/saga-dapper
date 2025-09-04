@@ -79,19 +79,19 @@ public class AvailabilityService : IAvailabilityService
         try
         {
             using var db = await _dbConnectionFactory.CreateAsync();
-            
+
             if (basePrice == null)
             {
                 // Get current price if basePrice is not provided
                 var existingAvailability = await db.QueryFirstOrDefaultAsync<RoomAvailability>(
                     "SELECT * FROM RoomAvailabilities WHERE HotelId = @HotelId AND RoomTypeId = @RoomTypeId AND Date = @Date",
                     new { HotelId = hotelId, RoomTypeId = roomTypeId, Date = date.Date });
-                
+
                 if (existingAvailability == null)
                 {
                     throw new ArgumentException("Base price is required for new availability records");
                 }
-                
+
                 // Calculate the current price based on the base price and pricing rules
                 decimal currentPrice = await CalculateCurrentPriceAsync(new RoomAvailability
                 {
@@ -100,7 +100,7 @@ public class AvailabilityService : IAvailabilityService
                     Date = date.Date,
                     BasePrice = existingAvailability.BasePrice
                 });
-                
+
                 var param = new SpInput.UpdateAvailabilityParams
                 {
                     HotelId = hotelId,
@@ -112,9 +112,9 @@ public class AvailabilityService : IAvailabilityService
                     LastUpdated = DateTime.UtcNow,
                     p_refcur_1 = null
                 };
-                
+
                 var result = (await _dapperRepo.ExecuteSpQueryAsync<RoomAvailability, SpInput.UpdateAvailabilityParams>(param, db)).FirstOrDefault();
-                
+
                 await _eventBus.PublishAsync(new RoomAvailabilityChangedEvent
                 {
                     HotelId = hotelId,
@@ -135,7 +135,7 @@ public class AvailabilityService : IAvailabilityService
                     Date = date.Date,
                     BasePrice = basePrice.Value
                 });
-                
+
                 var param = new SpInput.UpdateAvailabilityParams
                 {
                     HotelId = hotelId,
@@ -147,9 +147,9 @@ public class AvailabilityService : IAvailabilityService
                     LastUpdated = DateTime.UtcNow,
                     p_refcur_1 = null
                 };
-                
+
                 var result = (await _dapperRepo.ExecuteSpQueryAsync<RoomAvailability, SpInput.UpdateAvailabilityParams>(param, db)).FirstOrDefault();
-                
+
                 await _eventBus.PublishAsync(new RoomAvailabilityChangedEvent
                 {
                     HotelId = hotelId,
@@ -708,7 +708,7 @@ public class AvailabilityService : IAvailabilityService
             }
 
             // Add demand-based adjustments
-            var forecast = await db.QueryFirstOrDefaultAsync<DemandForecast>(
+            var forecast = await db.QueryFirstOrDefaultAsync<HotelManagement.Services.Availability.Models.Dtos.DemandForecast>(
                 "SELECT * FROM DemandForecasts WHERE HotelId = @HotelId AND RoomTypeId = @RoomTypeId AND Date = @Date",
                 new { HotelId = hotelId, RoomTypeId = roomTypeId, Date = date });
 
@@ -719,7 +719,7 @@ public class AvailabilityService : IAvailabilityService
                     Type = "DemandForecast",
                     Name = "Demand-based Adjustment",
                     Description = $"Based on expected demand of {forecast.ExpectedDemand} rooms",
-                    AdjustmentPercentage = forecast.SuggestedPriceAdjustment,
+                    AdjustmentPercentage = (decimal)forecast.SuggestedPriceAdjustment,
                     Priority = 30
                 });
             }
@@ -740,7 +740,7 @@ public class AvailabilityService : IAvailabilityService
         }
     }
 
-    public async Task UpdateDemandForecastAsync(DemandForecast forecast)
+    public async Task UpdateDemandForecastAsync(HotelManagement.Services.Availability.Models.Dtos.DemandForecast forecast)
     {
         try
         {
@@ -751,25 +751,25 @@ public class AvailabilityService : IAvailabilityService
                 RoomTypeId = forecast.RoomTypeId,
                 Date = forecast.Date,
                 ExpectedDemand = forecast.ExpectedDemand,
-                SuggestedPriceAdjustment = forecast.SuggestedPriceAdjustment,
+                SuggestedPriceAdjustment = (decimal)forecast.SuggestedPriceAdjustment,
                 Factors = forecast.Factors,
                 IsActive = forecast.IsActive,
                 p_refcur_1 = null
             };
-            var result = (await _dapperRepo.ExecuteSpQueryAsync<DemandForecast, SpInput.UpdateDemandForecastParams>(param, db)).FirstOrDefault();
+            var result = (await _dapperRepo.ExecuteSpQueryAsync<HotelManagement.Services.Availability.Models.Dtos.DemandForecast, SpInput.UpdateDemandForecastParams>(param, db)).FirstOrDefault();
 
             // Recalculate prices for the forecasted date
             await RecalculatePricesForPeriodAsync(forecast.HotelId, forecast.Date, forecast.Date, forecast.RoomTypeId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating demand forecast for hotel {HotelId}, room type {RoomTypeId}", 
+            _logger.LogError(ex, "Error updating demand forecast for hotel {HotelId}, room type {RoomTypeId}",
                 forecast.HotelId, forecast.RoomTypeId);
             throw;
         }
     }
 
-    public async Task<List<DemandForecast>> GetDemandForecastsAsync(
+    public async Task<List<HotelManagement.Services.Availability.Models.Dtos.DemandForecast>> GetDemandForecastsAsync(
         Guid hotelId,
         Guid roomTypeId,
         DateTime startDate,
@@ -786,12 +786,12 @@ public class AvailabilityService : IAvailabilityService
                 EndDate = endDate,
                 p_refcur_1 = null
             };
-            var forecasts = await _dapperRepo.ExecuteSpQueryAsync<DemandForecast, SpInput.GetDemandForecastsParams>(param, db);
+            var forecasts = await _dapperRepo.ExecuteSpQueryAsync<HotelManagement.Services.Availability.Models.Dtos.DemandForecast, SpInput.GetDemandForecastsParams>(param, db);
             return forecasts.ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting demand forecasts for hotel {HotelId}, room type {RoomTypeId}", 
+            _logger.LogError(ex, "Error getting demand forecasts for hotel {HotelId}, room type {RoomTypeId}",
                 hotelId, roomTypeId);
             throw;
         }
@@ -870,11 +870,11 @@ public class AvailabilityService : IAvailabilityService
         }
 
         // Apply demand-based adjustments
-        var forecast = await db.QueryFirstOrDefaultAsync<DemandForecast>("SELECT * FROM DemandForecasts WHERE HotelId = @HotelId AND RoomTypeId = @RoomTypeId AND Date = @Date", new { HotelId = availability.HotelId, RoomTypeId = availability.RoomTypeId, Date = date });
+        var forecast = await db.QueryFirstOrDefaultAsync<HotelManagement.Services.Availability.Models.Dtos.DemandForecast>("SELECT * FROM DemandForecasts WHERE HotelId = @HotelId AND RoomTypeId = @RoomTypeId AND Date = @Date", new { HotelId = availability.HotelId, RoomTypeId = availability.RoomTypeId, Date = date });
 
         if (forecast != null)
         {
-            adjustments.Add(forecast.SuggestedPriceAdjustment);
+            adjustments.Add((decimal)forecast.SuggestedPriceAdjustment);
         }
 
         // Calculate final price with all adjustments

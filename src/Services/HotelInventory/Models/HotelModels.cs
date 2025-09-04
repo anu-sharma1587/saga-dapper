@@ -74,6 +74,8 @@ public class RoomType
     public List<RoomAmenity> RoomAmenities { get; set; } = new();
     public List<Image> Images { get; set; } = new();
     public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public Hotel? Hotel { get; set; }
 }
 
@@ -103,7 +105,6 @@ public class Policy
 {
     public Guid Id { get; set; }
     public Guid HotelId { get; set; }
-    public string Type { get; set; } = string.Empty; // e.g., Cancellation, CheckIn, CheckOut, Payment
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? Terms { get; set; }

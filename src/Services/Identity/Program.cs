@@ -1,21 +1,41 @@
+using HotelManagement.Services.Identity.Services;
+using DataAccess.DbConnectionProvider;
+using DataAccess.Dapper;
+
 var builder = WebApplication.CreateBuilder(args);
-// Add Dapper and DataAccess DI
-builder.Services.AddScoped<IDbConnectionFactory>(sp =>
-    new DbConnectionFactory(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        builder.Configuration["DatabaseProvider"]));
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
 builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
-
-// Add services to the container.
-
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Auth:Authority"];
+        options.Audience = builder.Configuration["Auth:Audience"];
+        options.RequireHttpsMetadata = builder.Environment.IsProduction();
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -23,9 +43,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

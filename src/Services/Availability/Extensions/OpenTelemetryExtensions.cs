@@ -1,12 +1,15 @@
 using System.Diagnostics;
 using HotelManagement.Services.Availability.Monitoring;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Exporter;
 
 namespace HotelManagement.Services.Availability.Extensions;
 
 public static class OpenTelemetryExtensions
 {
-    public static IServiceCollection AddOpenTelemetry(
+    public static IServiceCollection AddCustomOpenTelemetry(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -15,9 +18,7 @@ public static class OpenTelemetryExtensions
             {
                 metrics
                     .AddMeter("HotelManagement.Availability")
-                    .AddRuntimeMetrics()
-                    .AddProcessMetrics()
-                    .AddHttpClientMetrics();
+                    .AddRuntimeInstrumentation();
 
                 // Configure exporters based on configuration
                 var prometheusEndpoint = configuration["OpenTelemetry:Prometheus:Endpoint"];

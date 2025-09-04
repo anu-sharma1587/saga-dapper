@@ -1,13 +1,13 @@
-using DataAccess;
-using DataAccess.Postgres;
 using HotelManagement.Services.Payment.Services;
+using DataAccess.DbConnectionProvider;
+using DataAccess.Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddSingleton<IDbConnectionFactory>(new PostgresConnectionFactory(connectionString));
-builder.Services.AddScoped<IDataRepository, DapperDataRepository>();
+builder.Services.AddSingleton<IDbConnectionFactory>(new DbConnectionFactory(connectionString, "Npgsql"));
+builder.Services.AddScoped<IDapperDataRepository, DapperDataRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddControllers();

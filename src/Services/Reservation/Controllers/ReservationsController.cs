@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HotelManagement.Services.Reservation.Services;
 using HotelManagement.Services.Reservation.DTOs;
-using HotelManagement.BuildingBlocks.Common.Exceptions;
 
 namespace HotelManagement.Services.Reservation.Controllers;
 
@@ -32,7 +31,7 @@ public class ReservationsController : ControllerBase
             var reservation = await _reservationService.CreateReservationAsync(request);
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
         }
-        catch (BusinessException ex)
+        catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -48,7 +47,7 @@ public class ReservationsController : ControllerBase
             var reservation = await _reservationService.GetReservationByIdAsync(id);
             return Ok(reservation);
         }
-        catch (NotFoundException)
+        catch (KeyNotFoundException)
         {
             return NotFound();
         }
@@ -86,11 +85,11 @@ public class ReservationsController : ControllerBase
             var reservation = await _reservationService.UpdateReservationStatusAsync(id, request);
             return Ok(reservation);
         }
-        catch (NotFoundException)
+        catch (KeyNotFoundException)
         {
             return NotFound();
         }
-        catch (BusinessException ex)
+        catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -99,84 +98,84 @@ public class ReservationsController : ControllerBase
     [HttpPost("{id}/cancel")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CancelReservation(Guid id, [FromBody] string reason)
+    public async Task<IActionResult> CancelReservation(Guid id, [FromBody] CancelReservationRequest request)
     {
         try
         {
-            await _reservationService.CancelReservationAsync(id, reason);
-            return Ok();
+            var result = await _reservationService.CancelReservationAsync(id, request.Reason);
+            if (!result)
+            {
+                return NotFound(new { message = $"Reservation with ID {id} not found." });
+            }
+            return Ok(new { message = "Reservation cancelled successfully." });
         }
-        catch (NotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, "Error cancelling reservation with ID {Id}", id);
+            return StatusCode(500, new { message = "An error occurred while cancelling the reservation." });
         }
     }
 
-    [HttpPost("{id}/check-in")]
+    [HttpPost("{id}/checkin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CheckIn(Guid id)
     {
         try
         {
-            await _reservationService.CheckInAsync(id);
-            return Ok();
+            var result = await _reservationService.CheckInAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Reservation with ID {id} not found." });
+            }
+            return Ok(new { message = "Check-in successful." });
         }
-        catch (NotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, "Error checking in reservation with ID {Id}", id);
+            return StatusCode(500, new { message = "An error occurred during check-in." });
         }
     }
 
-    [HttpPost("{id}/check-out")]
+    [HttpPost("{id}/checkout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CheckOut(Guid id)
     {
         try
         {
-            await _reservationService.CheckOutAsync(id);
-            return Ok();
+            var result = await _reservationService.CheckOutAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Reservation with ID {id} not found." });
+            }
+            return Ok(new { message = "Check-out successful." });
         }
-        catch (NotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, "Error checking out reservation with ID {Id}", id);
+            return StatusCode(500, new { message = "An error occurred during check-out." });
         }
     }
 
-    [HttpPost("{id}/no-show")]
+    [HttpPost("{id}/noshow")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> MarkAsNoShow(Guid id)
     {
         try
         {
-            await _reservationService.MarkAsNoShowAsync(id);
-            return Ok();
+            var result = await _reservationService.MarkAsNoShowAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = $"Reservation with ID {id} not found." });
+            }
+            return Ok(new { message = "Reservation marked as no-show." });
         }
-        catch (NotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, "Error marking reservation with ID {Id} as no-show", id);
+            return StatusCode(500, new { message = "An error occurred while marking the reservation as no-show." });
         }
     }
 
@@ -185,33 +184,28 @@ public class ReservationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdatePaymentStatus(
         Guid id,
-        [FromQuery] bool isPaid,
-        [FromQuery] decimal? depositAmount = null)
+        [FromBody] UpdatePaymentStatusRequest request)
     {
         try
         {
-            await _reservationService.UpdatePaymentStatusAsync(id, isPaid, depositAmount);
-            return Ok();
+            var result = await _reservationService.UpdatePaymentStatusAsync(id, request.IsPaid, request.DepositAmount);
+            if (!result)
+            {
+                return NotFound(new { message = $"Reservation with ID {id} not found." });
+            }
+            return Ok(new { message = "Payment status updated successfully." });
         }
-        catch (NotFoundException)
+        catch (KeyNotFoundException)
         {
-            return NotFound();
+            return NotFound(new { message = $"Reservation with ID {id} not found." });
         }
-    }
-
-    [HttpPost("{id}/compensate-cancel")]
-    [AllowAnonymous]
-    public async Task<IActionResult> CompensateCancelReservation(Guid id)
-    {
-        // Used by orchestrator for compensation
-        try
+        catch (Exception ex)
         {
-            await _reservationService.CancelReservationAsync(id, "Saga compensation");
-            return Ok();
-        }
-        catch
-        {
-            return NotFound();
+            _logger.LogError(ex, "Error updating payment status for reservation with ID {Id}", id);
+            return StatusCode(500, new { message = "An error occurred while updating the payment status." });
         }
     }
 }
+
+public record CancelReservationRequest(string Reason);
+public record UpdatePaymentStatusRequest(bool IsPaid, decimal? DepositAmount = null);

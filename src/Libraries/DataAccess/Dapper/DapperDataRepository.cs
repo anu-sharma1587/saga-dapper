@@ -4,12 +4,25 @@ using System.Data.Common;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
+using DataAccess.Mediator.Attributes;
 
 namespace DataAccess.Dapper
 {
     public class DapperDataRepository : IDapperDataRepository
     {
-        public async Task<int> AddAsync<TEntity>(TEntity entity, DbConnection dbConnection) where TEntity : class, new()
+        public async Task<IEnumerable<T>> ExecuteSpQueryAsync<T, TParams>(TParams parameters, DbConnection dbConnection) where T : class, new()
+        {
+            // Assume TParams has a DbProcedureAttribute with the procedure name
+            var procedureAttr = typeof(TParams).GetCustomAttributes(typeof(DbProcedureAttribute), false);
+            if (procedureAttr.Length == 0)
+                throw new InvalidOperationException($"Missing DbProcedureAttribute on {typeof(TParams).Name}");
+            var procedureName = ((DbProcedureAttribute)procedureAttr[0]).Name;
+
+            // Use Dapper's QueryAsync for stored procedure
+            var result = await dbConnection.QueryAsync<T>(procedureName, parameters, commandType: System.Data.CommandType.StoredProcedure);
+            return result;
+        }
+    public async Task<int> AddAsync<TEntity>(TEntity entity, DbConnection dbConnection) where TEntity : class, new()
         {
             // Example: Insert using Dapper
             // You may want to use a library like Dapper.Contrib or custom SQL

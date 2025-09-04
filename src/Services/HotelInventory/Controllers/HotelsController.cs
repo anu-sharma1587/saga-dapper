@@ -134,7 +134,6 @@ public class HotelsController : ControllerBase
             {
                 hotel.Policies = request.Policies.Select(p => new Policy
                 {
-                    Type = p.Type,
                     Name = p.Name,
                     Description = p.Description,
                     Terms = p.Terms,

@@ -2,6 +2,7 @@ using HotelManagement.Services.Availability.Models;
 using DataAccess.Dapper;
 using Dapper;
 using Npgsql;
+using DataAccess.DbConnectionProvider;
 
 namespace HotelManagement.Services.Availability.Configuration;
 
@@ -11,13 +12,17 @@ public static class DataSeeder
     {
         using var scope = serviceProvider.CreateScope();
         var connectionFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
+    var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+    var logger = loggerFactory.CreateLogger("DataSeeder");
 
         try
         {
-            using var connection = connectionFactory.CreateConnection();
-            await SeedSeasonalPeriodsAsync(connection);
-            await SeedPricingRulesAsync(connection);
+            using var dbConnection = await connectionFactory.CreateAsync();
+            var npgsqlConnection = dbConnection as NpgsqlConnection;
+            if (npgsqlConnection == null)
+                throw new InvalidCastException("Connection is not an NpgsqlConnection");
+            await SeedSeasonalPeriodsAsync(npgsqlConnection);
+            await SeedPricingRulesAsync(npgsqlConnection);
         }
         catch (Exception ex)
         {
